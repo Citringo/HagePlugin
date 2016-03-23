@@ -1,0 +1,8 @@
+chat:
+  enable: true
+  message: 誰がハゲじゃハゲ
+  patternlist:
+    - ハゲ|hage|はげ
+  replace: false
+ime:
+  user: []

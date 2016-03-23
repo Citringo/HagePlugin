@@ -1,0 +1,20 @@
+
+name: HagePlugin
+version: 1.9-1.0.0
+main: net.citringo.hageplugin.HagePlugin
+commands:
+  hage:
+    description: Darega Hageja Hage
+    permission: hageplugin.hage
+    usage: /<command> message <messsage>, enable, disable, replace <false|true>, list, add, remove, clear
+  hageime:
+    description: Do you have no hair? Don't worry, we have Japanese input method.
+    permission: hageplugin.ime
+    aliases: [hageime, hi, hime]
+permissions:
+    hageplugin.hage:
+        description: Allows you to set hage settings
+        default: op
+    hageplugin.ime:
+        description: Allows you to set ime settings
+        default: true
