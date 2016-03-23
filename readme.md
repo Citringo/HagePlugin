@@ -9,7 +9,7 @@ Spigot APIは使用していないのでおそらくCraftBukkitで動作でき�
 このプラグインは，MinecraftForge MODである[HageMOD](https://gist.github.com/otya128/7158e81d9d55d82dd7ea) の，Bukkitへの移植となります．
 HageMOD は，otya氏によって開発されました．
 
-このプラグインは MIT License で公開されています．詳しくは，リポジトリ内の「LICENSE」というファイルを見てください．
+このプラグインは MIT License で公開されています．詳しくは，リポジトリ内の「LICENSE.md」というファイルを見てください．
 
 # Build に必要なもの
 - JDK 1.7
