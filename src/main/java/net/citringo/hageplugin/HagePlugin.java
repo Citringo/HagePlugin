@@ -168,9 +168,7 @@ public class HagePlugin extends JavaPlugin implements Listener {
 	}
 
 	public void readConfig() {
-		if (config == null) {
-			config = getConfig();
-		}
+		config = getConfig();
 		// もしconfig.ymlが存在しないなら、既定のconfig.ymlをコピーします。
         this.saveDefaultConfig();
 		
@@ -190,9 +188,7 @@ public class HagePlugin extends JavaPlugin implements Listener {
 	}
 
 	public void writeConfig() {
-		if (config == null) {
-			config = getConfig();
-		}
+		config = getConfig();
 		
 		// chat
 		config.set("chat.enable", enableChat);
