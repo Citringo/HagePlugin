@@ -15,20 +15,20 @@ import java.util.regex.Pattern;
  */
 class AAA
 {
-    static final Map<String, String> map1;
-    static final Map<String, String> map2;
-    static final Map<String, String> map3;
-    static final Map<String, String> map4;
-    static Pattern AAE;
-    static String[] ABB = {"A", "I", "U", "E", "O"};
-    static void ABA(String str)
+    private static final Map<String, String> map1;
+    private static final Map<String, String> map2;
+    private static final Map<String, String> map3;
+    private static final Map<String, String> map4;
+    private static final Pattern AAE;
+    private static final String[] ABB = {"A", "I", "U", "E", "O"};
+    private static void ABA(String str)
     {
         for(String ABC : ABB)
         {
             map3.put((str + str + ABC).toLowerCase(), "っ" + map2.get((str + ABC).toLowerCase()));
         }
     }
-    static void ABD(String str)
+    private static void ABD(String str)
     {
         for(String ABC : ABB)
         {

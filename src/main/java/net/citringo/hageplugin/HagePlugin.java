@@ -17,8 +17,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.regex.Pattern;
 import net.milkbowl.vault.chat.Chat;
-import net.minecraft.server.v1_9_R1.MinecraftServer;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -29,8 +27,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.map.MinecraftFont;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  *
@@ -39,8 +37,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 public class HagePlugin extends JavaPlugin implements Listener {
 
 	// Object
-	public FileConfiguration config;
-	private static HagePlugin instance;
+	private FileConfiguration config;
 
 	// Configs
 	private boolean enableChat;
@@ -50,31 +47,22 @@ public class HagePlugin extends JavaPlugin implements Listener {
 	private List<String> patterns;
 	private Pattern pattern;
 
-	public HagePlugin() {
-
-	}
-
 	@Override
 	public void onEnable() {
 		readConfig();
 		getServer().getPluginManager().registerEvents(this, this);
 		RegisteredServiceProvider<Chat> rsp = getServer().getServicesManager().getRegistration(Chat.class);
 		chat = rsp.getProvider();
-		getLogger().info("onEnable");
-	}
-
-	public static HagePlugin getInstance() {
-		if (instance == null) {
-			instance = (HagePlugin) Bukkit.getPluginManager().getPlugin("HagePlugin");
-		}
-		return instance;
 	}
 	
-	@EventHandler(priority = EventPriority.LOWEST)
+	@SuppressWarnings("unused")
+    @EventHandler(priority = EventPriority.LOWEST)
 	public void onAsyncPlayerChat(AsyncPlayerChatEvent e)
 	{
+        String basemessage = e.getMessage();
+        e.setFormat(getPrefix(e.getPlayer()) + "%s" + getSuffix(e.getPlayer()) + ChatColor.GREEN + ": " + ChatColor.RESET + "%s");
 		e.setMessage(e.getMessage().replaceAll("&([0-9a-fk-r])", "§$1"));
-		if (users.contains(e.getPlayer().getUniqueId().toString()))
+		if (users.contains(e.getPlayer().getUniqueId().toString()) && !(basemessage.getBytes().length > basemessage.length() || basemessage.matches("[ \\uFF61-\\uFF9F]+")))
 		{
 			try
 			{
@@ -100,7 +88,6 @@ public class HagePlugin extends JavaPlugin implements Listener {
 					}
 					henkanflag = !henkanflag;
 				}
-				e.setFormat(getPrefix(e.getPlayer()) + "%s" + getSuffix(e.getPlayer()) + ChatColor.GREEN + ": " + ChatColor.RESET + "%s");
 				e.setMessage(AAF + ChatColor.GRAY + "(" + e.getMessage() + ")");
 			}
 			catch (Exception ex)
@@ -111,24 +98,25 @@ public class HagePlugin extends JavaPlugin implements Listener {
 		if (!enableChat) return;
 		if (pattern.matcher(e.getMessage()).find())
 		{
-			if (replaceChat)
-			{
-				e.setMessage(pattern.matcher(e.getMessage()).replaceAll(message));
-				return;
-			}
-			getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-				@Override
-				public void run() {
-					getServer().broadcastMessage(ChatColor.BOLD + message);
-				}
-			}, 2);
+			if (replaceChat) {
+                e.setMessage(pattern.matcher(e.getMessage()).replaceAll(message));
+                return;
+            }
+            new BukkitRunnable() {
+
+                @Override
+                public void run() {
+                    getServer().broadcastMessage(ChatColor.BOLD + message);
+                }
+            }.runTaskLaterAsynchronously(this, 20);
+
 		}
 		
 		
 	}
 
-	public static Chat chat = null;
-	public String getPrefix(Player p) {
+	private static Chat chat = null;
+	private  String getPrefix(Player p) {
 		if (getServer().getPluginManager().getPlugin("Vault") != null && chat != null) {
 			return chat.getPlayerPrefix(p).replaceAll("&([0-9a-fk-r])", "§$1");
 		}
@@ -136,16 +124,16 @@ public class HagePlugin extends JavaPlugin implements Listener {
 		return "";
 	}
 	
-	public String getSuffix(Player p) {
+	private String getSuffix(Player p) {
 		if (getServer().getPluginManager().getPlugin("Vault") != null && chat != null) {
 			return chat.getPlayerSuffix(p).replaceAll("&([0-9a-fk-r])", "§$1");
 		}
 		return "";
 	}
 	
-	String hageime(String romaji) {
+	private String hageime(String romaji) {
 		Gson gson = new Gson();
-		List AAC = null;
+		List AAC;
 		String AAD = "";
 		try {
 			romaji = AAA.AAB(romaji);
@@ -167,7 +155,7 @@ public class HagePlugin extends JavaPlugin implements Listener {
 		return AAD;
 	}
 
-	public void readConfig() {
+	private void readConfig() {
 		config = getConfig();
 		// もしconfig.ymlが存在しないなら、既定のconfig.ymlをコピーします。
         this.saveDefaultConfig();
@@ -183,11 +171,10 @@ public class HagePlugin extends JavaPlugin implements Listener {
 		// ime
 		users = config.getStringList("ime.user");
 		
-		getLogger().info("readConfig");
 		updatePattern();
 	}
 
-	public void writeConfig() {
+	private void writeConfig() {
 		config = getConfig();
 		
 		// chat
@@ -200,20 +187,9 @@ public class HagePlugin extends JavaPlugin implements Listener {
 		config.set("ime.user", users);
 		saveConfig();
 		
-		getLogger().info("writeConfig" + String.format(
-				"chat.enable = %s"
-				+ "chat.message = %s"
-				+ "chat.patternlist = %s"
-				+ "chat.replace = %s"
-				+ "ime.user = %s", 
-				config.getBoolean("chat.enable"),
-				config.getString("chat.message"),
-				config.getStringList("chat.patternlist"),
-				config.getBoolean("chat.replace"),
-				config.getStringList("ime.user")));
 	}
 
-	String get(String u) {
+	private String get(String u) {
 		StringBuilder output = new StringBuilder();
 		try {
 			URL url = new URL(u);
@@ -246,58 +222,58 @@ public class HagePlugin extends JavaPlugin implements Listener {
 		return output.toString();
 	}
 
-	public String getMessage() {
+	private String getMessage() {
 		return message;
 	}
 
-	public List<String> getPatterns() {
+	private List<String> getPatterns() {
 		return patterns;
 	}
 
-	public void setMessage(String message) {
+	private void setMessage(String message) {
 		this.message = message;
 		writeConfig();
 	}
 
-	public void enableChat(boolean enable) {
+	private void enableChat(boolean enable) {
 		this.enableChat = enable;
 		writeConfig();
 	}
 
-	public void setReplace(boolean enable) {
+	private void setReplace(boolean enable) {
 		this.replaceChat = enable;
 		writeConfig();
 	}
 
-	protected void enableIME(String uuid) {
+	private void enableIME(String uuid) {
 		users.add(uuid);
 		writeConfig();
 	}
 
-	protected void disableIME(String uuid) {
+	private void disableIME(String uuid) {
 		users.remove(uuid);
 		writeConfig();
 	}
 
-	public void addPattern(String pattern) {
+	private void addPattern(String pattern) {
 		patterns.add(pattern);
 		updatePattern();
 		writeConfig();
 	}
 
-	public void removePattern(String pattern) {
+	private void removePattern(String pattern) {
 		patterns.remove(pattern);
 		updatePattern();
 		writeConfig();
 	}
 
-	public void clearPattern() {
+	private void clearPattern() {
 		patterns.clear();
 		updatePattern();
 		writeConfig();
 	}
 
-	protected void updatePattern() {
+	private void updatePattern() {
 		StringBuilder stringBuilder = new StringBuilder();
 		int i = 0;
 		for (String p : patterns) {
