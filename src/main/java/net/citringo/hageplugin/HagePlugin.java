@@ -60,9 +60,17 @@ public class HagePlugin extends JavaPlugin implements Listener {
 	public void onAsyncPlayerChat(AsyncPlayerChatEvent e)
 	{
         String basemessage = e.getMessage();
+        boolean inverse = false;
+        if (basemessage.charAt(0) == '!') {
+            e.setMessage(basemessage.substring(1));
+            if (basemessage.length() < 2 || basemessage.charAt(1) != '!')
+                inverse = true;
+            basemessage = e.getMessage();
+        }
+
         e.setFormat(getPrefix(e.getPlayer()) + "%s" + getSuffix(e.getPlayer()) + ChatColor.GREEN + ": " + ChatColor.RESET + "%s");
 		e.setMessage(e.getMessage().replaceAll("&([0-9a-fk-r])", "§$1"));
-		if (users.contains(e.getPlayer().getUniqueId().toString()) && !(basemessage.getBytes().length > basemessage.length() || basemessage.matches("[ \\uFF61-\\uFF9F]+")))
+		if ((users.contains(e.getPlayer().getUniqueId().toString()) && !(basemessage.getBytes().length > basemessage.length() || basemessage.matches("[ \\uFF61-\\uFF9F]+"))) ^ inverse)
 		{
 			try
 			{
